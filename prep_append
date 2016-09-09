@@ -1,0 +1,24 @@
+cp -p src/main/resources/META-INF/LICENSE .
+cp -p src/main/resources/META-INF/NOTICE .
+
+# unavailable test deps
+python3 /usr/share/java-utils/pom_editor.py pom_remove_dep javax.measure:jsr-275
+
+rm src/test/java/com/fasterxml/jackson/databind/introspect/NoClassDefFoundWorkaroundTest.java
+python3 /usr/share/java-utils/pom_editor.py pom_xpath_remove   pom:classpathDependencyExcludes
+
+
+python3 /usr/share/java-utils/pom_editor.py pom_xpath_inject   "pom:plugin[pom:artifactId='maven-javadoc-plugin']/pom:configuration" "<additionalparam>-Xdoclint:none</additionalparam>"
+
+python3 /usr/share/java-utils/pom_editor.py pom_xpath_remove   pom:failOnError
+
+
+# org.powermock.reflect.exceptions.FieldNotFoundException: Field 'fTestClass' was not found in class org.junit.internal.runners.MethodValidator.
+rm src/test/java/com/fasterxml/jackson/databind/type/TestTypeFactoryWithClassLoader.java
+
+# Off test that require connection with the web
+rm src/test/java/com/fasterxml/jackson/databind/ser/TestJdkTypes.java \
+ src/test/java/com/fasterxml/jackson/databind/deser/TestJdkTypes.java \
+ src/test/java/com/fasterxml/jackson/databind/TestJDKSerialization.java
+
+python3 /usr/share/java-utils/mvn_file.py : jackson-databind
